@@ -1804,15 +1804,12 @@
       }
       const s = readForm();
       const link = makeLink(s);
+      const cleanSender = (s.sender && s.sender.trim()) || 'A Friend';
 
-      // Clean, un-strippable email body with prominent reveal link
-      let body = `✦ A special moment has been crafted for you ✦\n\nFrom: ${s.sender}\n\nOpen your reveal here:\n${link}\n\n`;
-      if (s.unlockAt && s.unlockAt > Date.now()) {
-        body += `⏳ Scheduled Delivery: Sealed in Time Capsule until ${new Date(s.unlockAt).toLocaleString()}\n\n`;
-      }
-      body += `(Open the link above in any browser on your phone or laptop)\n\nWith warmth,\n${s.sender} ✦`;
+      // Clean, professional, 100% anti-spam email body
+      let body = `Hello,\n\n${cleanSender} shared a private note with you on Smart Notify.\n\nYou can view and open it here:\n${link}\n\n(Open in any browser on your phone, tablet, or laptop)\n\nBest regards,\n${cleanSender}`;
 
-      const subjectLine = `✦ A moment from ${s.sender} is waiting for you!`;
+      const subjectLine = `${cleanSender} sent you a message on Smart Notify`;
 
       return {
         to,
@@ -1945,10 +1942,15 @@
       const list = getAccountMoments();
       const item = list[idx];
       if (!item) return;
+      const subj = (item.subject || 'You received a message on Smart Notify')
+        .replace(/[\u2726\u2727\u2728\u2705\u274C\u23F3\u26A0\u2709\uFE0F✦]/g, '')
+        .trim();
+      const body = `Hello,\n\nI shared a private note with you on Smart Notify.\n\nYou can view and open it here:\n${item.link}\n\n(Open in any browser on your phone, tablet, or laptop)\n\nBest regards`;
       let url = 'https://mail.google.com/mail/?view=cm&fs=1'
         + '&to='      + encodeURIComponent(item.to)
-        + '&su='      + encodeURIComponent(item.subject || item.text.replace(/\s*\n\s*/g, ' '))
-        + '&body='    + encodeURIComponent('I made something special for you. Open it here:\n\n' + item.link);
+        + '&su='      + encodeURIComponent(subj)
+        + '&subject=' + encodeURIComponent(subj)
+        + '&body='    + encodeURIComponent(body);
       if (item.senderEmail && validEmail(item.senderEmail)) {
         url += '&bcc=' + encodeURIComponent(item.senderEmail);
       }
@@ -2012,6 +2014,7 @@
         let url = 'https://mail.google.com/mail/?view=cm&fs=1'
           + '&to='      + encodeURIComponent(m.to)
           + '&su='      + encodeURIComponent(m.subject)
+          + '&subject=' + encodeURIComponent(m.subject)
           + '&body='    + encodeURIComponent(m.body);
 
         // 3. If sender provided their email, BCC them so they automatically get a copy in their email account inbox
@@ -2059,10 +2062,11 @@
       }
 
       // Save to Sender's Account history with confirmed link
+      const cleanSenderHistory = (payload.sender && payload.sender.trim()) || 'A Friend';
       saveToSenderAccount({
         to: payload.recipient,
         senderEmail: payload.senderEmail,
-        subject: 'Message',
+        subject: `${cleanSenderHistory} sent you a message on Smart Notify`,
         link: shareUrl,
         payload: payload
       });
@@ -2104,7 +2108,7 @@
         const emailSubj = `${cleanSenderName} sent you a message on Smart Notify`;
         const emailMsg = `Hello,\n\n${cleanSenderName} sent you a private message through Smart Notify.\n\nYou can view and open it here:\n${shareUrl}\n\n(Open in any browser on your phone, tablet, or computer)\n\nBest regards,\n${cleanSenderName}`;
         
-        const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(payload.recipient)}&su=${encodeURIComponent(emailSubj)}&body=${encodeURIComponent(emailMsg)}`;
+        const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(payload.recipient)}&su=${encodeURIComponent(emailSubj)}&subject=${encodeURIComponent(emailSubj)}&body=${encodeURIComponent(emailMsg)}`;
         const waLink = `https://wa.me/?text=${encodeURIComponent(emailSubj + '\n\n' + shareUrl)}`;
 
         const directSendRow = document.getElementById('directSendRow');
