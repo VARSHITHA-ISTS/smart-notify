@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Notify — Create an Aesthetic Moment</title>
+  
+  <!-- Curated Aesthetic Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@500;700&family=Great+Vibes&family=Italiana&family=Orbitron:wght@500;800&family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #050508;
+      --card-bg: rgba(14, 14, 22, 0.74);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text: #f3f3f8;
+      --text-muted: #858598;
+      --accent-glow: rgba(199, 125, 255, 0.35);
+      --accent: #c77dff;
+      --accent-secondary: #7b2cbf;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient dynamic gradient orbs */
+    .ambient-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .aurora-orb {
+      position: fixed;
+      width: 580px;
+      height: 580px;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: -1;
+      transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .orb-1 { top: -120px; left: -100px; background: #6a00f4; }
+    .orb-2 { bottom: -140px; right: -120px; background: #b100e8; }
+
+    /* Card Wrapper */
+    .card-container {
+      width: min(94%, 720px);
+      border: 1px solid var(--card-border);
+      border-radius: 32px;
+      background: var(--card-bg);
+      backdrop-filter: blur(30px) saturate(190%);
+      -webkit-backdrop-filter: blur(30px) saturate(190%);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75), 0 0 50px rgba(255, 255, 255, 0.02);
+      padding: 42px 38px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s ease;
+    }
+
+    /* Stepper Header */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+    .step-indicator.active {
+      color: #fff;
+    }
+    .step-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+    .step-indicator.active .step-circle {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .step-line {
+      width: 34px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .step-line.active {
+      background: linear-gradient(90deg, var(--accent), rgba(255, 255, 255, 0.2));
+    }
+
+    /* Brand Header */
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-title {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #ffffff 40%, #d8b4fe 80%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .brand-sub {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* Multi-step Slider Pages */
+    .slider {
+      position: relative;
+      width: 100%;
+    }
+    .step-page {
+      display: none;
+      animation: slideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .step-page.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Form Inputs */
+    .input-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #d1d1e0;
+      letter-spacing: 0.5px;
+    }
+    .label-hint {
+      font-size: 11px;
+      color: #727288;
+      font-weight: 400;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      background: rgba(8, 8, 14, 0.7);
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+    input:focus, textarea:focus {
+      border-color: rgba(199, 125, 255, 0.7);
+      background: rgba(14, 14, 24, 0.85);
+      box-shadow: 0 0 20px rgba(199, 125, 255, 0.22);
+    }
+
+    /* Style Selector Cards */
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .style-card {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(12, 12, 20, 0.5);
+      border-radius: 16px;
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .style-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    .style-card.active {
+      border-color: var(--accent);
+      background: rgba(199, 125, 255, 0.12);
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+    .style-card .icon {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .style-card .name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* TIME CAPSULE SECTION */
+    .capsule-box {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(12, 12, 20, 0.55);
+      border-radius: 20px;
+      padding: 16px 18px;
+      margin-top: 6px;
+    }
+    .capsule-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .capsule-tab {
+      flex: 1;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(20, 20, 30, 0.4);
+      color: #9999b0;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .capsule-tab.active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.14);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
+    }
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .preset-chip {
+      padding: 6px 12px;
+      font-size: 11.5px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .preset-chip:hover, .preset-chip.active {
+      background: rgba(199, 125, 255, 0.2);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .datetime-container {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .datetime-container.visible {
+      display: block;
+    }
+    input[type="datetime-local"] {
+      color-scheme: dark;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .capsule-summary-note {
+      font-size: 11.5px;
+      color: #38bdf8;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 3-line Textarea */
+    .three-line-box-wrapper {
+      position: relative;
+    }
+    .three-line-textarea {
+      height: 98px;
+      line-height: 28px;
+      font-size: 17px;
+      resize: none;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .line-counter-pill {
+      position: absolute;
+      bottom: 12px;
+      right: 14px;
+      font-size: 11px;
+      padding: 3px 9px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 100px;
+      color: #a0a0ba;
+      pointer-events: none;
+    }
+    .line-counter-pill.limit {
+      color: #ff8585;
+      border-color: rgba(255, 100, 100, 0.4);
+    }
+
+    /* NEW: 3D LETTER vs NORMAL vs DOTS SELECTOR */
+    .dimension-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .dimension-card {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 10, 18, 0.55);
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .dimension-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .dimension-card.active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.14);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+    }
+    .dimension-card .dim-preview {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    .dimension-card .dim-name {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+    }
+
+    /* Expanded Aesthetic Font Selector Grid (8 distinct fonts) */
+    .font-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .font-card {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 10, 18, 0.6);
+      border-radius: 14px;
+      padding: 12px 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+      user-select: none;
+    }
+    .font-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .font-card.active {
+      border-color: #c77dff;
+      background: rgba(199, 125, 255, 0.15);
+      box-shadow: 0 0 16px rgba(199, 125, 255, 0.35);
+    }
+    .font-card .sample {
+      font-size: 16px;
+      color: #fff;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .font-card .font-name {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #7b7b90;
+    }
+
+    /* NEW: BACKGROUND VISUAL SETTINGS (Chosen by sender) */
+    .bg-settings-card {
+      background: rgba(10, 10, 18, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 16px 18px;
+      margin-top: 8px;
+    }
+    .bg-toggle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+    }
+    .bg-toggle-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #ccc;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .bg-toggle-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .bg-toggle-item.checked {
+      background: rgba(199, 125, 255, 0.14);
+      border-color: rgba(199, 125, 255, 0.4);
+      color: #fff;
+    }
+    .bg-toggle-item input {
+      display: none;
+    }
+    .toggle-check-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: transparent;
+      transition: all 0.2s;
+    }
+    .bg-toggle-item.checked .toggle-check-dot {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    /* Live Preview Box in Step 2 */
+    .live-preview-box {
+      margin-top: 20px;
+      padding: 22px;
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      background: rgba(5, 5, 10, 0.45);
+      min-height: 95px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    .live-preview-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #666680;
+      margin-bottom: 8px;
+    }
+    .live-preview-text {
+      font-size: 24px;
+      line-height: 1.55;
+      letter-spacing: 0.5px;
+      color: #fff;
+      max-width: 90%;
+      word-break: break-word;
+      transition: all 0.25s ease;
+    }
+    /* 3D styling preview */
+    .live-preview-text.style-3d {
+      text-shadow: 0 1px 0 #bbb, 0 2px 0 #999, 0 3px 0 #777, 0 4px 0 #555, 0 6px 15px rgba(0,0,0,0.8), 0 0 25px rgba(199, 125, 255, 0.6);
+      transform: perspective(600px) rotateX(10deg);
+    }
+    /* Dots styling preview */
+    .live-preview-text.style-dots {
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px #fff, 0 0 18px #38bdf8, 0 0 35px #a855f7;
+    }
+
+    /* Sender Live Link Box on Page */
+    .sender-live-link-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(56, 189, 248, 0.05);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .sender-live-link-info {
+      font-size: 12px;
+      color: #38bdf8;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sender-live-link-info strong {
+      color: #fff;
+      display: block;
+      margin-bottom: 2px;
+      font-size: 12.5px;
+    }
+    .btn-test-link {
+      padding: 6px 14px;
+      font-size: 12px;
+      background: #2a2a3e;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      flex: 0 0 auto;
+      text-decoration: none;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 26px;
+    }
+    button {
+      flex: 1;
+      padding: 16px 22px;
+      border: none;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      outline: none;
+    }
+    .btn-next, .btn-send {
+      background: linear-gradient(135deg, #ffffff 0%, #ececfe 100%);
+      color: #08080f;
+      box-shadow: 0 4px 24px rgba(255, 255, 255, 0.22);
+    }
+    .btn-next:hover, .btn-send:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+    }
+    .btn-preview {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .btn-preview:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateY(-2px);
+    }
+    .btn-back {
+      flex: 0 0 80px;
+      background: transparent;
+      color: #9090a8;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-back:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Direct Sending Status Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 2, 6, 0.9);
+      backdrop-filter: blur(18px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 999;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-card {
+      background: #0e0e18;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 28px;
+      padding: 38px 30px;
+      width: min(94%, 540px);
+      text-align: center;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85);
+    }
+    .spinner-ring {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #c77dff;
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .modal-icon {
+      font-size: 44px;
+      margin-bottom: 12px;
+      display: none;
+      animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-card h3 {
+      font-size: 23px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .modal-card p {
+      color: var(--text-muted);
+      font-size: 13.5px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .modal-status-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+    .share-box {
+      display: flex;
+      gap: 8px;
+      background: rgba(5, 5, 10, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      padding: 6px;
+      margin-bottom: 16px;
+    }
+    .share-box input {
+      border: none;
+      background: transparent;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #38bdf8;
+    }
+    .copy-btn {
+      flex: 0 0 auto;
+      padding: 8px 18px;
+      font-size: 13px;
+      border-radius: 10px;
+      background: #2a2a3e;
+      color: #fff;
+    }
+    .copy-btn:hover { background: #3e3e5c; }
+
+    #statusMessage {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #ff758f;
+      min-height: 18px;
+    }
+
+    @media (max-width: 540px) {
+      .card-container { padding: 30px 20px; }
+      .btn-row { flex-wrap: wrap; }
+      .btn-back { flex: 1 1 100%; order: 3; }
+      .style-grid { grid-template-columns: repeat(3, 1fr); }
+      .dimension-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Top Account Bar */
+    .top-account-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+    .account-pill-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 100px;
+      padding: 7px 15px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .account-pill-btn:hover {
+      background: rgba(199, 125, 255, 0.16);
+      border-color: rgba(199, 125, 255, 0.4);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(199, 125, 255, 0.25);
+    }
+    .account-badge-count {
+      background: var(--accent);
+      color: #000;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 100px;
+      display: none;
+    }
+
+    /* Primary Send Mail Button */
+    .btn-send-mail, .btn-gmail {
+      background: linear-gradient(135deg, #ffffff 0%, #ececfe 60%, #c77dff 100%);
+      color: #08080f;
+      font-weight: 700;
+      box-shadow: 0 4px 26px rgba(199, 125, 255, 0.4), 0 0 16px rgba(255, 255, 255, 0.2);
+    }
+    .btn-send-mail:hover, .btn-gmail:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 34px rgba(199, 125, 255, 0.6), 0 0 24px rgba(255, 255, 255, 0.35);
+    }
+
+    /* Account & Sent History Modal */
+    .account-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 2, 8, 0.88);
+      backdrop-filter: blur(20px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    .account-modal-card {
+      background: #0f0f1a;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 28px;
+      padding: 30px 26px;
+      width: min(94%, 640px);
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.9);
+    }
+    .account-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 14px;
+    }
+    .account-modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .account-modal-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .close-account-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .close-account-btn:hover {
+      background: rgba(255, 100, 100, 0.2);
+      border-color: rgba(255, 100, 100, 0.4);
+    }
+    .account-history-list {
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+      max-height: 50vh;
+    }
+    .history-item-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 16px;
+      padding: 14px 16px;
+      transition: all 0.25s ease;
+    }
+    .history-item-card:hover {
+      border-color: rgba(199, 125, 255, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .history-item-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 11.5px;
+      color: #a0a0ba;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .history-to {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+    .history-msg-preview {
+      font-size: 13px;
+      line-height: 1.4;
+      color: #f0f0fa;
+      margin-bottom: 10px;
+      font-style: italic;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border-left: 2px solid var(--accent);
+    }
+    .history-link-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .history-link-text {
+      font-size: 11.5px;
+      color: #38bdf8;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+    .history-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-history-action {
+      padding: 6px 12px;
+      font-size: 11.5px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-history-action:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Orbs -->
+  <div class="aurora-orb orb-1" id="orb1"></div>
+  <div class="aurora-orb orb-2" id="orb2"></div>
+
+  <!-- Background Canvas for Gentle Particles -->
+  <canvas class="ambient-canvas" id="canvasBg"></canvas>
+
+  <main class="card-container">
+    
+    <!-- Top Account Bar -->
+    <div class="top-account-bar">
+      <div class="account-pill-btn" id="btnOpenAccountModal" title="View all links saved to your account">
+        <span>✦ My Account & Sent Links</span>
+        <span class="account-badge-count" id="accountMomentCount">0</span>
+      </div>
+    </div>
+
+    <!-- Stepper indicator -->
+    <div class="stepper">
+      <div class="step-indicator active" id="step1Indicator">
+        <div class="step-circle">1</div>
+        <span>Sender & Theme</span>
+      </div>
+      <div class="step-line" id="stepLine"></div>
+      <div class="step-indicator" id="step2Indicator">
+        <div class="step-circle">2</div>
+        <span>Message & Effects</span>
+      </div>
+    </div>
+
+    <div class="brand">
+      <h1 class="brand-title">SMART NOTIFY</h1>
+      <p class="brand-sub">Craft a moment across space & time ✦</p>
+    </div>
+
+    <!-- Multi-step Form -->
+    <div class="slider">
+
+      <!-- STEP 1: Sender Name, Sender Email, Recipient Email, Theme & Time Capsule Schedule -->
+      <div class="step-page active" id="pageStep1">
+        <div class="input-group">
+          <label for="senderInput">
+            From
+            <span class="label-hint">Your Name</span>
+          </label>
+          <input type="text" id="senderInput" placeholder="Enter your name" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label for="senderEmail">
+            Sender Email (Your Account)
+            <span class="label-hint">Receive copy in your inbox & save to account</span>
+          </label>
+          <input type="email" id="senderEmail" placeholder="your-email@gmail.com" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label for="to">
+            To
+            <span class="label-hint">Recipient's Email</span>
+          </label>
+          <input type="email" id="to" name="recipientInput" placeholder="recipient@example.com" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label>
+            Visual Atmosphere ✦
+            <span class="label-hint">Choose aesthetic aura</span>
+          </label>
+          <div class="style-grid" id="styleGrid">
+            <div class="style-card active" data-style="cosmic">
+              <span class="icon">🪐</span>
+              <div class="name">Cosmic</div>
+            </div>
+            <div class="style-card" data-style="aurora">
+              <span class="icon">🌌</span>
+              <div class="name">Aurora</div>
+            </div>
+            <div class="style-card" data-style="birthday">
+              <span class="icon">✨</span>
+              <div class="name">Celebration</div>
+            </div>
+            <div class="style-card" data-style="romantic">
+              <span class="icon">💖</span>
+              <div class="name">Romantic</div>
+            </div>
+            <div class="style-card" data-style="minimal">
+              <span class="icon">✦</span>
+              <div class="name">Mystic Mono</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Celestial Time Capsule / Scheduled Delivery -->
+        <div class="input-group">
+          <label>
+            Delivery / Unlock Schedule ⏳
+            <span class="label-hint">Send now or seal for future</span>
+          </label>
+          <div class="capsule-box">
+            <div class="capsule-tabs">
+              <div class="capsule-tab active" id="tabInstant" data-mode="instant">
+                <span>⚡ Instant Reveal</span>
+              </div>
+              <div class="capsule-tab" id="tabCapsule" data-mode="scheduled">
+                <span>⏳ Time Capsule (Schedule)</span>
+              </div>
+            </div>
+
+            <!-- Schedule Presets & DateTime Picker -->
+            <div class="datetime-container" id="scheduleControls">
+              <div class="preset-chips">
+                <span class="preset-chip" data-months="1">+1 Month</span>
+                <span class="preset-chip" data-months="3">+3 Months</span>
+                <span class="preset-chip" data-months="6">+6 Months</span>
+                <span class="preset-chip" data-years="1">+1 Year</span>
+                <span class="preset-chip" data-years="2">+2 Years</span>
+                <span class="preset-chip" data-years="5">+5 Years</span>
+              </div>
+              
+              <label style="font-size: 11.5px; color: #aaa; margin-bottom: 6px;">Exact Date & Time to Unlock:</label>
+              <input type="datetime-local" id="datetimePicker">
+              
+              <div class="capsule-summary-note" id="scheduleNote">
+                <span>🔒 Message will remain sealed until this exact moment.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Link Lifetime / Expiration Setting -->
+        <div class="input-group">
+          <label>
+            Link Expiration & Availability ⌛
+            <span class="label-hint">Choose link duration</span>
+          </label>
+          <div class="capsule-tabs" id="expiryTabs" style="margin-top: 6px;">
+            <div class="capsule-tab active" data-expiry="30d">
+              <span>📅 30 Days (Standard)</span>
+            </div>
+            <div class="capsule-tab" data-expiry="24h">
+              <span>⚡ 24 Hours (Ephemeral)</span>
+            </div>
+            <div class="capsule-tab" data-expiry="forever">
+              <span>♾️ Forever (Permanent)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-next" id="btnNext">
+            <span>Next: Craft Message ➔</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: 3-Line Message, Font Picker, 3D Mode & Custom Background Visuals -->
+      <div class="step-page" id="pageStep2">
+        <div class="input-group">
+          <label for="messageInput">
+            Your Secret Message ✦
+            <span class="label-hint">Strict 3-Line Limit</span>
+          </label>
+          <div class="three-line-box-wrapper">
+            <textarea 
+              id="messageInput" 
+              class="three-line-textarea" 
+              placeholder="Line 1: Underneath the quiet stars...&#10;Line 2: I wanted you to know...&#10;Line 3: You light up every room ✦"
+              rows="3"
+            ></textarea>
+            <div class="line-counter-pill" id="lineCounterPill">0 / 3 lines</div>
+          </div>
+        </div>
+
+        <!-- NEW: 3D LETTER vs NORMAL vs DOTS SELECTOR -->
+        <div class="input-group">
+          <label>
+            Message Letter Display Style ✦
+            <span class="label-hint">3D Depth, Dots, or Ethereal</span>
+          </label>
+          <div class="dimension-grid" id="dimensionGrid">
+            <div class="dimension-card active" data-dim="3d">
+              <div class="dim-preview" style="text-shadow: 0 1px 0 #bbb, 0 2px 0 #999, 0 3px 0 #666, 0 0 15px #c77dff;">3D Depth 💎</div>
+              <div class="dim-name">Dimensional 3D</div>
+            </div>
+            <div class="dimension-card" data-dim="dots">
+              <div class="dim-preview" style="text-shadow: 0 0 6px #38bdf8, 0 0 16px #a855f7;">Dots Matrix ✨</div>
+              <div class="dim-name">Combinational Dots</div>
+            </div>
+            <div class="dimension-card" data-dim="normal">
+              <div class="dim-preview">Normal ✦</div>
+              <div class="dim-name">Ethereal Glow</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPANDED AESTHETIC FONTS (8 curated choices) -->
+        <div class="input-group">
+          <label>
+            Aesthetic Font Style ✦
+            <span class="label-hint">Choose your typography</span>
+          </label>
+          <div class="font-grid" id="fontGrid">
+            <div class="font-card active" data-font="'Italiana', serif" data-name="Italiana">
+              <div class="sample" style="font-family: 'Italiana', serif;">Ethereal</div>
+              <div class="font-name">Italiana</div>
+            </div>
+            <div class="font-card" data-font="'Cinzel Decorative', serif" data-name="Cinzel">
+              <div class="sample" style="font-family: 'Cinzel Decorative', serif;">Cinematic</div>
+              <div class="font-name">Cinzel</div>
+            </div>
+            <div class="font-card" data-font="'Great Vibes', cursive" data-name="Calligraphy">
+              <div class="sample" style="font-family: 'Great Vibes', cursive; font-size: 19px;">Poetry</div>
+              <div class="font-name">Calligraphy</div>
+            </div>
+            <div class="font-card" data-font="'Cormorant Garamond', serif" data-name="Editorial">
+              <div class="sample" style="font-family: 'Cormorant Garamond', serif; font-style: italic;">Editorial</div>
+              <div class="font-name">Garamond</div>
+            </div>
+            <div class="font-card" data-font="'Syne', sans-serif" data-name="Avant-Garde">
+              <div class="sample" style="font-family: 'Syne', sans-serif;">Modern</div>
+              <div class="font-name">Syne</div>
+            </div>
+            <div class="font-card" data-font="'Orbitron', sans-serif" data-name="Cyber Glow">
+              <div class="sample" style="font-family: 'Orbitron', sans-serif;">Sci-Fi</div>
+              <div class="font-name">Orbitron</div>
+            </div>
+            <div class="font-card" data-font="'Playfair Display', serif" data-name="Poetic">
+              <div class="sample" style="font-family: 'Playfair Display', serif;">Poetic</div>
+              <div class="font-name">Playfair</div>
+            </div>
+            <div class="font-card" data-font="'Space Mono', monospace" data-name="Typewriter">
+              <div class="sample" style="font-family: 'Space Mono', monospace; font-size: 14px;">Mystic</div>
+              <div class="font-name">Space Mono</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: BACKGROUND VISUAL SETTINGS (Chosen by sender) -->
+        <div class="input-group">
+          <label>
+            Background Visual Settings ✦
+            <span class="label-hint">Customize animation layers</span>
+          </label>
+          <div class="bg-settings-card">
+            <div class="bg-toggle-grid">
+              <label class="bg-toggle-item checked" id="togglePolygons">
+                <input type="checkbox" id="chkPolygons" checked>
+                <span class="toggle-check-dot">✓</span>
+                <span>Layered Polygons</span>
+              </label>
+              <label class="bg-toggle-item checked" id="toggleParticles">
+                <input type="checkbox" id="chkParticles" checked>
+                <span class="toggle-check-dot">✓</span>
+                <span>Thousands of Particles</span>
+              </label>
+              <label class="bg-toggle-item checked" id="toggleBloom">
+                <input type="checkbox" id="chkBloom" checked>
+                <span class="toggle-check-dot">✓</span>
+                <span>💫 Soft Bloom & Glow</span>
+              </label>
+              <label class="bg-toggle-item checked" id="toggleTrails">
+                <input type="checkbox" id="chkTrails" checked>
+                <span class="toggle-check-dot">✓</span>
+                <span>Long Glowing Trails</span>
+              </label>
+              <label class="bg-toggle-item checked" id="toggleNebula">
+                <input type="checkbox" id="chkNebula" checked>
+                <span class="toggle-check-dot">✓</span>
+                <span>Subtle Mist / Nebula</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Typography & 3D Preview Box -->
+        <div class="live-preview-box">
+          <div class="live-preview-title">Live Typography & Dimensional Preview</div>
+          <div class="live-preview-text style-3d" id="livePreviewText" style="font-family: 'Italiana', serif;">
+            Underneath the quiet stars...<br>I wanted you to know...<br>You light up every room ✦
+          </div>
+        </div>
+
+        <!-- Sender Live Website Link Box (Sender views link being sent) -->
+        <div class="sender-live-link-box" id="senderLiveLinkBox" style="flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 220px;">
+            <div class="sender-live-link-info">
+              <strong>🌐 Live Smart Notify Reveal Link for Recipient:</strong>
+              <span id="senderLiveLinkText">http://localhost:3000/message.html</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+              <span style="font-size: 11px; color: #a0a0ba;">Website Domain:</span>
+              <input type="text" id="liveDomainInput" placeholder="http://localhost:3000" style="padding: 4px 8px; font-size: 11px; margin: 0; width: 190px; height: 26px; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #38bdf8;">
+              <button type="button" id="btnSaveLiveDomain" style="padding: 4px 10px; font-size: 10.5px; height: 26px; border-radius: 6px; background: #2a2a3e; color: #fff; cursor: pointer; flex: 0 0 auto; border: 1px solid rgba(255,255,255,0.2);">Set Domain</button>
+            </div>
+          </div>
+          <a href="#" class="btn-test-link" id="btnSenderTestLink" target="_blank" style="margin-left: auto;">View Live ↗</a>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-back" id="btnBack">
+            <span>← Back</span>
+          </button>
+          <button type="button" class="btn-preview" id="btnPreview">
+            <span>✦ Preview</span>
+          </button>
+          <button type="button" class="btn-send-mail" id="btnGmail" title="Send this aesthetic Smart Notify moment to recipient via email">
+            <span>📮 Send Mail</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="statusMessage"></div>
+  </main>
+
+  <!-- Direct Automated Email Dispatch Modal -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal-card">
+      
+      <div class="spinner-ring" id="sendingSpinner"></div>
+      <div class="modal-icon" id="modalIcon">📨</div>
+
+      <h3 id="modalHeading">Sending to Recipient...</h3>
+      <div class="modal-status-badge" id="modalScheduleBadge">⚡ Preparing Dispatch</div>
+      <p id="modalRecipientText">Delivering your Smart Notify moment directly to recipient's email address.</p>
+      
+      <!-- Generated Link Box for Sender -->
+      <div class="share-box" id="linkBox" style="display: none;">
+        <input type="text" id="shareUrlInput" readonly>
+        <button class="copy-btn" id="copyUrlBtn">Copy Link</button>
+      </div>
+
+      <!-- Configurable Web Domain Setting -->
+      <div id="domainSettingBox" style="display: none; margin-bottom: 14px; font-size: 11.5px; color: #888; text-align: left; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+        <div style="margin-bottom: 4px; color: #bbb;">🌐 <strong>Email Link Domain (Website URL):</strong></div>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="hostDomainInput" placeholder="http://localhost:3000" style="padding: 6px 10px; font-size: 12px; margin: 0; border-radius: 8px; background: #11111a; border: 1px solid #333; color: #38bdf8; flex: 1;">
+          <button type="button" id="saveHostBtn" style="padding: 6px 12px; font-size: 11px; border-radius: 8px; background: #2a2a3e; color: #fff; border: 1px solid #444; cursor: pointer; flex: 0 0 auto;">Update</button>
+        </div>
+      </div>
+
+      <!-- Live Email Body Preview -->
+      <details id="emailPreviewDetails" style="display: none; margin-bottom: 14px; text-align: left; font-size: 11.5px; color: #aaa; background: rgba(0,0,0,0.5); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <summary style="cursor: pointer; font-weight: 600; color: #38bdf8;">👁️ View Exact Text Sent In Email</summary>
+        <pre id="emailContentPreview" style="margin-top: 10px; white-space: pre-wrap; word-break: break-all; color: #e0e0f0; font-family: monospace; font-size: 11px; line-height: 1.5;"></pre>
+      </details>
+
+      <!-- Direct Sending Helpers (Gmail & WhatsApp) -->
+      <div id="directSendRow" style="display: none; margin: 12px 0 8px; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11.5px; color: #cbd5e1; text-align: left; font-weight: 500;">Send directly to recipient:</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <a id="btnGmailDirect" target="_blank" style="flex: 1; min-width: 130px; text-decoration: none; background: #ea4335; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(234,67,53,0.3);">
+            ✉️ Open in Gmail
+          </a>
+          <a id="btnWhatsAppDirect" target="_blank" style="flex: 1; min-width: 130px; text-decoration: none; background: #25d366; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">
+            💬 WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="btn-row" id="modalActions" style="margin-top: 10px; display: none;">
+        <button class="btn-preview" id="openExperienceBtn">View Sent Reveal ✦</button>
+        <button class="btn-send" id="closeModalBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sender Account & Sent Links History Modal -->
+  <div class="account-modal-overlay" id="accountModal">
+    <div class="account-modal-card">
+      <div class="account-modal-header">
+        <div>
+          <div class="account-modal-title">✦ My Smart Notify Account</div>
+          <div class="account-modal-subtitle">All reveal links and moments created from your account</div>
+        </div>
+        <button type="button" class="close-account-btn" id="btnCloseAccountModal" title="Close">✕</button>
+      </div>
+
+      <div class="account-history-list" id="accountHistoryList">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+        <button type="button" id="btnClearAccountHistory" style="padding: 8px 14px; font-size: 11px; background: rgba(255,100,100,0.1); border: 1px solid rgba(255,100,100,0.25); color: #ff8585; border-radius: 8px; cursor: pointer;">
+          Clear History
+        </button>
+        <button type="button" class="btn-send" id="btnCloseAccountModalDone" style="flex: 0 0 auto; padding: 10px 24px; font-size: 13px;">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let currentTheme = 'cosmic';
+    let currentFont = "'Italiana', serif";
+    let currentFontName = "Italiana";
+    let currentDimension = "3d"; // '3d', 'dots', 'normal'
+    let isScheduled = false;
+    let scheduledTimestamp = null;
+
+    // Background visual layers state
+    let bgSettings = {
+      polygons: true,
+      particles: true,
+      bloom: true,
+      trails: true,
+      nebula: true
+    };
+
+    // Toggle Background Checkboxes
+    function setupBgToggle(id, key) {
+      const item = document.getElementById(id);
+      const chk = item.querySelector('input');
+      item.addEventListener('click', (e) => {
+        chk.checked = !chk.checked;
+        bgSettings[key] = chk.checked;
+        if (chk.checked) item.classList.add('checked');
+        else item.classList.remove('checked');
+      });
+    }
+    setupBgToggle('togglePolygons', 'polygons');
+    setupBgToggle('toggleParticles', 'particles');
+    setupBgToggle('toggleBloom', 'bloom');
+    setupBgToggle('toggleTrails', 'trails');
+    setupBgToggle('toggleNebula', 'nebula');
+
+    // Dimension / 3D Mode Selector
+    document.querySelectorAll('#dimensionGrid .dimension-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('#dimensionGrid .dimension-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        currentDimension = card.dataset.dim;
+        
+        const preview = document.getElementById('livePreviewText');
+        preview.classList.remove('style-3d', 'style-dots');
+        if (currentDimension === '3d') preview.classList.add('style-3d');
+        if (currentDimension === 'dots') preview.classList.add('style-dots');
+      });
+    });
+
+    // Expiry Tabs Selection (30 Days / 24 Hours / Forever)
+    let currentExpiry = '30d'; // '30d', '24h', 'forever'
+    document.querySelectorAll('#expiryTabs .capsule-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#expiryTabs .capsule-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentExpiry = tab.dataset.expiry;
+      });
+    });
+
+    // Initialize datetime picker with default +1 month
+    const dtPicker = document.getElementById('datetimePicker');
+    function setDefaultDate(monthsToAdd = 1, yearsToAdd = 0) {
+      const d = new Date();
+      if (yearsToAdd) d.setFullYear(d.getFullYear() + yearsToAdd);
+      if (monthsToAdd) d.setMonth(d.getMonth() + monthsToAdd);
+      const iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      dtPicker.value = iso;
+      scheduledTimestamp = d.getTime();
+      updateScheduleNote();
+    }
+    setDefaultDate(1, 0);
+
+    // Time Capsule Mode Toggle
+    const tabInstant = document.getElementById('tabInstant');
+    const tabCapsule = document.getElementById('tabCapsule');
+    const scheduleControls = document.getElementById('scheduleControls');
+
+    tabInstant.addEventListener('click', () => {
+      tabInstant.classList.add('active');
+      tabCapsule.classList.remove('active');
+      scheduleControls.classList.remove('visible');
+      isScheduled = false;
+      scheduledTimestamp = null;
+    });
+
+    tabCapsule.addEventListener('click', () => {
+      tabCapsule.classList.add('active');
+      tabInstant.classList.remove('active');
+      scheduleControls.classList.add('visible');
+      isScheduled = true;
+      if (!scheduledTimestamp) {
+        setDefaultDate(1, 0);
+      }
+    });
+
+    // Preset Chips
+    document.querySelectorAll('.preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+
+        const months = parseInt(chip.dataset.months || '0', 10);
+        const years = parseInt(chip.dataset.years || '0', 10);
+        setDefaultDate(months, years);
+      });
+    });
+
+    dtPicker.addEventListener('change', () => {
+      if (dtPicker.value) {
+        scheduledTimestamp = new Date(dtPicker.value).getTime();
+        updateScheduleNote();
+      }
+    });
+
+    function updateScheduleNote() {
+      if (scheduledTimestamp) {
+        const formatted = new Date(scheduledTimestamp).toLocaleString('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+        document.getElementById('scheduleNote').innerHTML = 
+          `<span>🔒 Sealed in time capsule until: <strong>${formatted}</strong></span>`;
+      }
+    }
+
+    // Theme Selector
+    document.querySelectorAll('#styleGrid .style-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('#styleGrid .style-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        currentTheme = card.dataset.style;
+        updateOrbs(currentTheme);
+      });
+    });
+
+    function updateOrbs(theme) {
+      const orb1 = document.getElementById('orb1');
+      const orb2 = document.getElementById('orb2');
+      if (theme === 'cosmic') {
+        orb1.style.background = '#6a00f4';
+        orb2.style.background = '#b100e8';
+      } else if (theme === 'aurora') {
+        orb1.style.background = '#00f5d4';
+        orb2.style.background = '#7b2cbf';
+      } else if (theme === 'birthday') {
+        orb1.style.background = '#ff9e00';
+        orb2.style.background = '#ff0054';
+      } else if (theme === 'romantic') {
+        orb1.style.background = '#ff0a54';
+        orb2.style.background = '#9e0059';
+      } else {
+        orb1.style.background = '#4a4e69';
+        orb2.style.background = '#22223b';
+      }
+    }
+
+    // Font Selector
+    document.querySelectorAll('#fontGrid .font-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('#fontGrid .font-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        currentFont = card.dataset.font;
+        currentFontName = card.dataset.name;
+        document.getElementById('livePreviewText').style.fontFamily = currentFont;
+      });
+    });
+
+    // Helper function $(id)
+    const $ = (id) => {
+      if (id === 'to') return document.getElementById('to') || document.getElementById('recipientInput');
+      if (id === 'recipientInput') return document.getElementById('recipientInput') || document.getElementById('to');
+      return document.getElementById(id);
+    };
+
+    function validEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+    }
+
+    function say(msg) {
+      showStatus(msg);
+      if (msg && !msg.toLowerCase().includes('enter') && !msg.toLowerCase().includes('valid')) {
+        statusMsg.style.color = '#38bdf8';
+      } else {
+        statusMsg.style.color = '#ff758f';
+      }
+    }
+
+    // Step Navigation
+    const btnNext = document.getElementById('btnNext');
+    const btnBack = document.getElementById('btnBack');
+    const step1 = document.getElementById('pageStep1');
+    const step2 = document.getElementById('pageStep2');
+    const step1Ind = document.getElementById('step1Indicator');
+    const step2Ind = document.getElementById('step2Indicator');
+    const stepLine = document.getElementById('stepLine');
+    const statusMsg = document.getElementById('statusMessage');
+
+    btnNext.addEventListener('click', () => {
+      const sender = (document.getElementById('senderInput')?.value.trim()) || '';
+      const recipient = $('to') ? $('to').value.trim() : '';
+
+      if (!sender) {
+        say('Please enter your name.');
+        return;
+      }
+      if (!validEmail(recipient)) {
+        say('Please enter a valid recipient email in "To".');
+        if ($('to')) $('to').focus();
+        return;
+      }
+
+      if (isScheduled && (!scheduledTimestamp || scheduledTimestamp <= Date.now())) {
+        say('Please choose a future unlock date and time for the time capsule.');
+        return;
+      }
+
+      say('');
+      step1.classList.remove('active');
+      step2.classList.add('active');
+      step1Ind.classList.remove('active');
+      step2Ind.classList.add('active');
+      stepLine.classList.add('active');
+
+      updateSenderLiveLink();
+    });
+
+    btnBack.addEventListener('click', () => {
+      step2.classList.remove('active');
+      step1.classList.add('active');
+      step2Ind.classList.remove('active');
+      step1Ind.classList.add('active');
+      stepLine.classList.remove('active');
+      say('');
+    });
+
+    function showStatus(text) {
+      statusMsg.textContent = text;
+    }
+
+    // 3-LINE LIMIT LOGIC
+    const messageInput = document.getElementById('messageInput');
+    const lineCounterPill = document.getElementById('lineCounterPill');
+    const livePreviewText = document.getElementById('livePreviewText');
+
+    messageInput.addEventListener('keydown', (e) => {
+      const lines = messageInput.value.split('\n');
+      if (e.key === 'Enter' && lines.length >= 3) {
+        e.preventDefault();
+      }
+    });
+
+    messageInput.addEventListener('input', () => {
+      let lines = messageInput.value.split('\n');
+      if (lines.length > 3) {
+        messageInput.value = lines.slice(0, 3).join('\n');
+        lines = messageInput.value.split('\n');
+      }
+
+      const count = messageInput.value.trim() === '' ? 0 : lines.length;
+      lineCounterPill.textContent = `${count} / 3 lines`;
+      if (count >= 3) {
+        lineCounterPill.classList.add('limit');
+      } else {
+        lineCounterPill.classList.remove('limit');
+      }
+
+      if (messageInput.value.trim()) {
+        livePreviewText.innerHTML = messageInput.value.replace(/\n/g, '<br>');
+      } else {
+        livePreviewText.innerHTML = 'Underneath the quiet stars...<br>I wanted you to know...<br>You light up every room ✦';
+      }
+
+      updateSenderLiveLink();
+    });
+
+    // Build Payload
+    function buildPayload() {
+      const sender = (document.getElementById('senderInput')?.value.trim()) || 'A Friend';
+      const senderEmail = (document.getElementById('senderEmail')?.value.trim()) || '';
+      const recipient = $('to') ? $('to').value.trim() : '';
+      const message = messageInput.value.trim() || 'Underneath the quiet stars...\nI wanted you to know...\nYou light up every room ✦';
+
+      return {
+        id: Math.random().toString(36).substring(2, 9),
+        sender,
+        senderEmail,
+        recipient,
+        message,
+        theme: currentTheme,
+        font: currentFont,
+        fontName: currentFontName,
+        dimension: currentDimension, // '3d', 'dots', or 'normal'
+        bgEffects: bgSettings,
+        unlockAt: isScheduled ? scheduledTimestamp : null,
+        expiryOption: currentExpiry,
+        createdAt: Date.now()
+      };
+    }
+
+    // Generate Share URL with Base64 payload
+    function getShareableUrl(payload) {
+      const jsonStr = JSON.stringify(payload);
+      const encoded = encodeURIComponent(btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+        return String.fromCharCode('0x' + p1);
+      })));
+      
+      const origin = window.location.origin;
+      const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+
+      // If running on local file:// or without origin, use public GitHub Pages URL as default
+      if (!origin || origin === 'null' || window.location.protocol === 'file:') {
+        const savedHost = localStorage.getItem('smartNotifyHost');
+        if (savedHost) {
+          return `${savedHost.replace(/\/$/, '')}/message.html?data=${encoded}`;
+        }
+        return `https://varshitha-ists.github.io/smart-notify/message.html?data=${encoded}`;
+      }
+      
+      return `${origin}${path}/message.html?data=${encoded}`;
+    }
+
+    // Update Live Link for Sender View
+    function updateSenderLiveLink() {
+      const payload = buildPayload();
+      const shareUrl = getShareableUrl(payload);
+      const linkSpan = document.getElementById('senderLiveLinkText');
+      const testLinkBtn = document.getElementById('btnSenderTestLink');
+      
+      linkSpan.textContent = shareUrl;
+      linkSpan.title = shareUrl;
+      
+      // Sync Live Domain Input
+      const domainInput = document.getElementById('liveDomainInput');
+      if (domainInput && !domainInput.value) {
+        domainInput.value = localStorage.getItem('smartNotifyHost') || (window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin);
+      }
+
+      if (window.location.protocol === 'file:') {
+        const jsonStr = JSON.stringify(payload);
+        const encoded = encodeURIComponent(btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+          return String.fromCharCode('0x' + p1);
+        })));
+        testLinkBtn.href = `message.html?data=${encoded}`;
+      } else {
+        testLinkBtn.href = shareUrl;
+      }
+    }
+
+    // Set Domain Button Handler
+    const btnSaveLiveDomain = document.getElementById('btnSaveLiveDomain');
+    if (btnSaveLiveDomain) {
+      btnSaveLiveDomain.addEventListener('click', () => {
+        const domainInput = document.getElementById('liveDomainInput');
+        const val = (domainInput?.value.trim()) || '';
+        if (val) {
+          localStorage.setItem('smartNotifyHost', val.replace(/\/$/, ''));
+          btnSaveLiveDomain.textContent = 'Saved! ✓';
+          updateSenderLiveLink();
+          setTimeout(() => { btnSaveLiveDomain.textContent = 'Set Domain'; }, 1600);
+        }
+      });
+    }
+
+    // PREVIEW BUTTON
+    document.getElementById('btnPreview').addEventListener('click', () => {
+      const payload = buildPayload();
+      localStorage.setItem('smartNotifyLatest', JSON.stringify(payload));
+      
+      let previewUrl;
+      const jsonStr = JSON.stringify(payload);
+      const encoded = encodeURIComponent(btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+        return String.fromCharCode('0x' + p1);
+      })));
+      if (window.location.protocol === 'file:') {
+        previewUrl = `message.html?data=${encoded}`;
+      } else {
+        previewUrl = getShareableUrl(payload);
+      }
+      window.open(previewUrl, '_blank');
+    });
+
+    // DIRECT EMAIL DISPATCH LOGIC
+    async function sendDirectEmail(payload, fallbackUrl) {
+      const shareUrl = fallbackUrl || getShareableUrl(payload);
+
+      // 1. Primary: Official Smart Notify Backend Endpoint
+      try {
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: payload.recipient,
+            sender: payload.sender,
+            senderEmail: payload.senderEmail,
+            message: payload.message,
+            theme: payload.theme,
+            font: payload.font,
+            fontName: payload.fontName,
+            dimension: payload.dimension,
+            bgEffects: payload.bgEffects,
+            unlockAt: payload.unlockAt,
+            expiryOption: payload.expiryOption || currentExpiry
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data) {
+          return {
+            success: true,
+            url: data.url || shareUrl,
+            id: data.id,
+            emailDelivered: data.emailDelivered === true,
+            service: data.emailStatus?.service,
+            emailError: data.emailError
+          };
+        } else {
+          return {
+            success: false,
+            url: shareUrl,
+            emailDelivered: false,
+            emailError: data.details || data.error || 'Server could not dispatch email.'
+          };
+        }
+      } catch (err) {
+        console.warn('Backend /api/messages not reachable:', err);
+        return {
+          success: false,
+          url: shareUrl,
+          emailDelivered: false,
+          emailError: 'Local server is not running on localhost:3000.'
+        };
+      }
+    }
+
+    // FORM & MAIL CONSTRUCTION
+    function readForm() {
+      const sender = (document.getElementById('senderInput')?.value.trim()) || 'A Friend';
+      const senderEmail = (document.getElementById('senderEmail')?.value.trim()) || '';
+      const to = $('to') ? $('to').value.trim() : '';
+      const text = (document.getElementById('messageInput')?.value.trim()) || 'Underneath the quiet stars...\nI wanted you to know...\nYou light up every room ✦';
+
+      return {
+        sender,
+        senderEmail,
+        to,
+        recipient: to,
+        text,
+        message: text,
+        theme: currentTheme,
+        font: currentFont,
+        fontName: currentFontName,
+        dimension: currentDimension, // '3d', 'dots', or 'normal'
+        bgEffects: bgSettings,
+        unlockAt: isScheduled ? scheduledTimestamp : null,
+        createdAt: Date.now()
+      };
+    }
+
+    function makeLink(s) {
+      const payload = {
+        id: Math.random().toString(36).substring(2, 9),
+        sender: s.sender,
+        senderEmail: s.senderEmail,
+        recipient: s.to || s.recipient,
+        message: s.text || s.message,
+        theme: s.theme,
+        font: s.font,
+        fontName: s.fontName,
+        dimension: s.dimension,
+        bgEffects: s.bgEffects,
+        unlockAt: s.unlockAt,
+        createdAt: s.createdAt || Date.now()
+      };
+      return getShareableUrl(payload);
+    }
+
+    function buildMail() {
+      const to = $('to') ? $('to').value.trim() : '';
+      if (!validEmail(to)) {
+        say('Enter a valid email address in "Send to".');
+        if ($('to')) $('to').focus();
+        return null;
+      }
+      const s = readForm();
+      const link = makeLink(s);
+
+      // Clean, un-strippable email body with prominent reveal link
+      let body = `✦ A special moment has been crafted for you ✦\n\nFrom: ${s.sender}\n\nOpen your reveal here:\n${link}\n\n`;
+      if (s.unlockAt && s.unlockAt > Date.now()) {
+        body += `⏳ Scheduled Delivery: Sealed in Time Capsule until ${new Date(s.unlockAt).toLocaleString()}\n\n`;
+      }
+      body += `(Open the link above in any browser on your phone or laptop)\n\nWith warmth,\n${s.sender} ✦`;
+
+      const subjectLine = `✦ A moment from ${s.sender} is waiting for you!`;
+
+      return {
+        to,
+        senderEmail: s.senderEmail,
+        subject: subjectLine,
+        body,
+        link,
+        payload: s
+      };
+    }
+
+    // SENDER ACCOUNT & HISTORY SYSTEM
+    function getAccountMoments() {
+      try {
+        return JSON.parse(localStorage.getItem('smartNotifyAccountMoments') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveToSenderAccount(m) {
+      try {
+        const list = getAccountMoments();
+        const record = {
+          id: m.payload?.id || Math.random().toString(36).substring(2, 9),
+          to: m.to,
+          sender: m.payload?.sender || 'You',
+          senderEmail: m.senderEmail || '',
+          subject: m.subject || (m.payload?.message ? m.payload.message.replace(/\s*\n\s*/g, ' ').substring(0, 80) : 'Smart Notify Moment'),
+          text: m.payload?.text || m.payload?.message || m.subject,
+          link: m.link,
+          unlockAt: m.payload?.unlockAt || null,
+          createdAt: Date.now()
+        };
+        // Avoid duplicate links
+        if (!list.some(item => item.link === record.link)) {
+          list.unshift(record);
+          localStorage.setItem('smartNotifyAccountMoments', JSON.stringify(list));
+        }
+        updateAccountBadge();
+        renderAccountHistory();
+      } catch (e) {
+        console.error('Failed to save moment to account storage:', e);
+      }
+    }
+
+    function updateAccountBadge() {
+      const list = getAccountMoments();
+      const badge = $('accountMomentCount');
+      if (badge) {
+        badge.textContent = list.length;
+        badge.style.display = list.length > 0 ? 'inline-block' : 'none';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderAccountHistory() {
+      const container = $('accountHistoryList');
+      if (!container) return;
+      const list = getAccountMoments();
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: #727288;">
+            <div style="font-size: 32px; margin-bottom: 10px;">✦</div>
+            <p style="font-size: 14px; color: #aaa;">No sent links saved in your account yet.</p>
+            <p style="font-size: 12px; margin-top: 4px;">When you craft and send a moment, its Smart Notify link will appear here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map((item, idx) => {
+        const dateStr = new Date(item.createdAt).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const isLocked = item.unlockAt && item.unlockAt > Date.now();
+        const lockBadge = isLocked 
+          ? `<span style="background: rgba(255,183,3,0.12); border: 1px solid rgba(255,183,3,0.3); color: #ffb703; font-size: 10px; padding: 2px 8px; border-radius: 100px;">⏳ Sealed until ${new Date(item.unlockAt).toLocaleDateString()}</span>`
+          : `<span style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25); color: #38bdf8; font-size: 10px; padding: 2px 8px; border-radius: 100px;">⚡ Ready</span>`;
+
+        return `
+          <div class="history-item-card">
+            <div class="history-item-meta">
+              <div>To: <span class="history-to">${escapeHtml(item.to)}</span></div>
+              <div style="display: flex; align-items: center; gap: 6px;">${dateStr} ${lockBadge}</div>
+            </div>
+            <div class="history-msg-preview">“${escapeHtml(item.text.replace(/\n/g, ' • '))}”</div>
+            <div class="history-link-row">
+              <span class="history-link-text">${escapeHtml(item.link)}</span>
+              <button type="button" class="copy-btn" onclick="copyHistoryLink('${encodeURIComponent(item.link)}', this)">Copy</button>
+            </div>
+            <div class="history-actions">
+              <a href="${item.link}" target="_blank" class="btn-history-action">
+                <span>👁️ Open Reveal</span>
+              </a>
+              <button type="button" class="btn-history-action" onclick="resendInGmail('${idx}')">
+                <span>📮 Resend in Gmail</span>
+              </button>
+              <button type="button" class="btn-history-action" style="color: #ff8585; border-color: rgba(255,100,100,0.2);" onclick="deleteAccountMoment(${idx})">
+                <span>✕ Delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.copyHistoryLink = (encodedUrl, btn) => {
+      const url = decodeURIComponent(encodedUrl);
+      navigator.clipboard.writeText(url).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied! ✓';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      });
+    };
+
+    window.resendInGmail = (idx) => {
+      const list = getAccountMoments();
+      const item = list[idx];
+      if (!item) return;
+      let url = 'https://mail.google.com/mail/?view=cm&fs=1'
+        + '&to='      + encodeURIComponent(item.to)
+        + '&su='      + encodeURIComponent(item.subject || item.text.replace(/\s*\n\s*/g, ' '))
+        + '&body='    + encodeURIComponent('I made something special for you. Open it here:\n\n' + item.link);
+      if (item.senderEmail && validEmail(item.senderEmail)) {
+        url += '&bcc=' + encodeURIComponent(item.senderEmail);
+      }
+      window.open(url, '_blank');
+    };
+
+    window.deleteAccountMoment = (idx) => {
+      const list = getAccountMoments();
+      list.splice(idx, 1);
+      localStorage.setItem('smartNotifyAccountMoments', JSON.stringify(list));
+      updateAccountBadge();
+      renderAccountHistory();
+    };
+
+    // Notice Modal when sending via Gmail
+    function openSenderAccountNotice(m) {
+      const modal = $('shareModal');
+      const spinner = $('sendingSpinner');
+      const modalIcon = $('modalIcon');
+      const modalHeading = $('modalHeading');
+      const modalBadge = $('modalScheduleBadge');
+      const modalRecipientText = $('modalRecipientText');
+      const linkBox = $('linkBox');
+      const modalActions = $('modalActions');
+
+      modal.style.display = 'flex';
+      spinner.style.display = 'none';
+      modalIcon.style.display = 'block';
+      modalIcon.textContent = '📮';
+      modalHeading.textContent = 'Gmail Compose Opened!';
+      modalBadge.textContent = '✦ Saved to Your Account & Sent via Gmail';
+      modalBadge.style.color = '#38bdf8';
+      modalBadge.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+
+      let accountCopyNote = m.senderEmail 
+        ? `<br><span style="color: #a855f7;">✉️ A copy was BCC'd to <strong>${escapeHtml(m.senderEmail)}</strong> so the link is in your email inbox too.</span>`
+        : `<br><span style="color: #aaa;">💡 Tip: You can also find this link anytime in your <strong>"My Account & Sent Links"</strong> drawer above.</span>`;
+
+      modalRecipientText.innerHTML = 
+        `Your Smart Notify message to <strong>${escapeHtml(m.to)}</strong> is ready in Gmail.${accountCopyNote}`;
+
+      $('shareUrlInput').value = m.link;
+      linkBox.style.display = 'flex';
+      modalActions.style.display = 'flex';
+
+      $('openExperienceBtn').onclick = () => {
+        window.open(m.link, '_blank');
+      };
+    }
+
+    // Gmail Send Button Handler
+    if ($('btnGmail')) {
+      $('btnGmail').onclick = () => {
+        const m = buildMail();
+        if (!m) return;
+
+        // 1. Save link into Sender's Account storage so they can always view and manage it
+        saveToSenderAccount(m);
+
+        // 2. Build Gmail Compose URL
+        let url = 'https://mail.google.com/mail/?view=cm&fs=1'
+          + '&to='      + encodeURIComponent(m.to)
+          + '&su='      + encodeURIComponent(m.subject)
+          + '&body='    + encodeURIComponent(m.body);
+
+        // 3. If sender provided their email, BCC them so they automatically get a copy in their email account inbox
+        if (m.senderEmail && validEmail(m.senderEmail)) {
+          url += '&bcc=' + encodeURIComponent(m.senderEmail);
+        }
+
+        // 4. Open Gmail compose
+        window.open(url, '_blank');
+
+        say('✦ Opening Gmail! Smart Notify link also saved to your account.');
+        openSenderAccountNotice(m);
+      };
+    }
+
+    // SEND BUTTON -> DIRECT AUTOMATED DISPATCH (if present)
+    if (document.getElementById('btnSend')) {
+      document.getElementById('btnSend').addEventListener('click', async () => {
+      const payload = buildPayload();
+      localStorage.setItem('smartNotifyLatest', JSON.stringify(payload));
+      let shareUrl = getShareableUrl(payload);
+
+      const modal = document.getElementById('shareModal');
+      const spinner = document.getElementById('sendingSpinner');
+      const modalIcon = document.getElementById('modalIcon');
+      const modalHeading = document.getElementById('modalHeading');
+      const modalBadge = document.getElementById('modalScheduleBadge');
+      const modalRecipientText = document.getElementById('modalRecipientText');
+      const linkBox = document.getElementById('linkBox');
+      const modalActions = document.getElementById('modalActions');
+
+      modal.style.display = 'flex';
+      spinner.style.display = 'block';
+      modalIcon.style.display = 'none';
+      linkBox.style.display = 'none';
+      modalActions.style.display = 'none';
+
+      modalHeading.textContent = `Sending to ${payload.recipient}...`;
+      modalBadge.textContent = '⚡ Transmitting via Smart Notify Gateway';
+      modalRecipientText.textContent = `Packaging your 3-line cinematic reveal and sending directly to ${payload.recipient}.`;
+
+      const dispatchResult = await sendDirectEmail(payload, shareUrl);
+      if (dispatchResult && dispatchResult.url) {
+        shareUrl = dispatchResult.url;
+      }
+
+      // Save to Sender's Account history with confirmed link
+      saveToSenderAccount({
+        to: payload.recipient,
+        senderEmail: payload.senderEmail,
+        subject: 'Message',
+        link: shareUrl,
+        payload: payload
+      });
+
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        modalIcon.style.display = 'block';
+
+        const isDelivered = dispatchResult && dispatchResult.emailDelivered === true;
+
+        if (isDelivered) {
+          modalIcon.textContent = '✓';
+          modalIcon.style.color = '#38bdf8';
+          modalHeading.textContent = 'Sent Successfully!';
+          modalBadge.textContent = '✉️ Delivered to ' + (dispatchResult.service || 'Mail Server');
+          modalBadge.style.color = '#00f5d4';
+          modalBadge.style.borderColor = 'rgba(0, 245, 212, 0.4)';
+
+          modalRecipientText.innerHTML = 
+            `Your Smart Notify message has been <strong>successfully sent to ${escapeHtml(payload.recipient)}</strong>.<br>The recipient can click the link in their mail to open the reveal.`;
+        } else {
+          modalIcon.textContent = '✉️';
+          modalIcon.style.color = '#fbbf24';
+          modalHeading.textContent = 'Reveal Link Ready!';
+          modalBadge.textContent = '⚡ Direct Send Option Ready';
+          modalBadge.style.color = '#fbbf24';
+          modalBadge.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+
+          const reason = dispatchResult && dispatchResult.emailError 
+            ? dispatchResult.emailError 
+            : 'Automated email service is not configured yet in .env.';
+
+          modalRecipientText.innerHTML = 
+            `Your secret reveal link is created! Click <strong>"Open in Gmail"</strong> below to send it directly from your Gmail with one click to <strong>${escapeHtml(payload.recipient)}</strong>, or share it via WhatsApp.<br><span style="color:#f87171;font-size:11px;display:block;margin-top:6px;background:rgba(239,68,68,0.1);padding:4px 8px;border-radius:6px;">⚠️ Background mail status: ${escapeHtml(reason)}</span>`;
+        }
+
+        // Configure Direct Send Buttons (Gmail & WhatsApp) - Clean, Anti-Spam Formatting
+        const cleanSenderName = (payload.sender && payload.sender.trim()) || 'A Friend';
+        const emailSubj = `${cleanSenderName} sent you a message on Smart Notify`;
+        const emailMsg = `Hello,\n\n${cleanSenderName} sent you a private message through Smart Notify.\n\nYou can view and open it here:\n${shareUrl}\n\n(Open in any browser on your phone, tablet, or computer)\n\nBest regards,\n${cleanSenderName}`;
+        
+        const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(payload.recipient)}&su=${encodeURIComponent(emailSubj)}&body=${encodeURIComponent(emailMsg)}`;
+        const waLink = `https://wa.me/?text=${encodeURIComponent(emailSubj + '\n\n' + shareUrl)}`;
+
+        const directSendRow = document.getElementById('directSendRow');
+        const btnGmailDirect = document.getElementById('btnGmailDirect');
+        const btnWhatsAppDirect = document.getElementById('btnWhatsAppDirect');
+        if (directSendRow && btnGmailDirect && btnWhatsAppDirect) {
+          directSendRow.style.display = 'flex';
+          btnGmailDirect.href = gmailLink;
+          btnWhatsAppDirect.href = waLink;
+        }
+
+        document.getElementById('shareUrlInput').value = shareUrl;
+        document.getElementById('senderLiveLinkText').textContent = shareUrl;
+        document.getElementById('btnSenderTestLink').href = shareUrl;
+        linkBox.style.display = 'flex';
+        modalActions.style.display = 'flex';
+
+        const domainSettingBox = document.getElementById('domainSettingBox');
+        const emailPreviewDetails = document.getElementById('emailPreviewDetails');
+        const hostInput = document.getElementById('hostDomainInput');
+        const previewPre = document.getElementById('emailContentPreview');
+
+        domainSettingBox.style.display = 'block';
+        emailPreviewDetails.style.display = 'block';
+        hostInput.value = localStorage.getItem('smartNotifyHost') || (window.location.protocol === 'file:' ? 'https://varshitha-ists.github.io/smart-notify' : window.location.origin);
+        
+        previewPre.textContent = 
+`Subject: ${emailSubj}
+To: ${payload.recipient}
+
+Hello,
+
+${cleanSenderName} sent you a private message on Smart Notify.
+
+View your message link:
+${shareUrl}
+${payload.unlockAt ? '(Scheduled unlock: ' + new Date(payload.unlockAt).toLocaleString() + ')' : ''}
+
+(Open in any browser on your phone, tablet, or computer)
+
+Best regards,
+${cleanSenderName}`;
+
+        document.getElementById('saveHostBtn').onclick = () => {
+          const newHost = hostInput.value.trim();
+          if (newHost) {
+            localStorage.setItem('smartNotifyHost', newHost);
+            const updatedUrl = getShareableUrl(payload);
+            document.getElementById('shareUrlInput').value = updatedUrl;
+            document.getElementById('senderLiveLinkText').textContent = updatedUrl;
+            previewPre.textContent = previewPre.textContent.replace(shareUrl, updatedUrl);
+            document.getElementById('saveHostBtn').textContent = 'Saved! ✓';
+            setTimeout(() => { document.getElementById('saveHostBtn').textContent = 'Update'; }, 1500);
+          }
+        };
+
+        document.getElementById('openExperienceBtn').onclick = () => {
+          window.open(shareUrl, '_blank');
+        };
+      }, 1200);
+      });
+    }
+
+    // Copy Link button
+    document.getElementById('copyUrlBtn').addEventListener('click', () => {
+      const input = document.getElementById('shareUrlInput');
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
+        document.getElementById('copyUrlBtn').textContent = 'Copied! ✓';
+        setTimeout(() => { document.getElementById('copyUrlBtn').textContent = 'Copy Link'; }, 2200);
+      });
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('shareModal').style.display = 'none';
+      showStatus('✦ Smart Notify has been sent to recipient mail & saved to your account!');
+    });
+
+    // Connect Account Modal Open/Close
+    if ($('btnOpenAccountModal')) {
+      $('btnOpenAccountModal').addEventListener('click', () => {
+        renderAccountHistory();
+        $('accountModal').style.display = 'flex';
+      });
+    }
+
+    if ($('btnCloseAccountModal')) {
+      $('btnCloseAccountModal').addEventListener('click', () => {
+        $('accountModal').style.display = 'none';
+      });
+    }
+
+    if ($('btnCloseAccountModalDone')) {
+      $('btnCloseAccountModalDone').addEventListener('click', () => {
+        $('accountModal').style.display = 'none';
+      });
+    }
+
+    if ($('btnClearAccountHistory')) {
+      $('btnClearAccountHistory').addEventListener('click', () => {
+        if (confirm('Clear all saved links from your account history?')) {
+          localStorage.removeItem('smartNotifyAccountMoments');
+          updateAccountBadge();
+          renderAccountHistory();
+        }
+      });
+    }
+
+    // Initialize Account Badge on page load
+    updateAccountBadge();
+
+    // Background Canvas Particles
+    const canvas = document.getElementById('canvasBg');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 1.6 + 0.4,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        alpha: Math.random() * 0.5 + 0.2
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>
